@@ -1,0 +1,35 @@
+<div class="kpi-card" [ngClass]="'theme-' + colorTheme">
+  <!-- Skeleton Loader -->
+  <div class="kpi-skeleton" *ngIf="loading">
+    <div class="skeleton-header">
+      <div class="skeleton-icon pulse"></div>
+      <div class="skeleton-badge pulse"></div>
+    </div>
+    <div class="skeleton-title pulse"></div>
+    <div class="skeleton-value pulse"></div>
+    <div class="skeleton-sub pulse"></div>
+  </div>
+
+  <!-- Real Content -->
+  <div class="kpi-content" *ngIf="!loading">
+    <div class="kpi-top">
+      <div class="icon-bubble">
+        <span class="material-symbols-outlined">{{ icon }}</span>
+      </div>
+      <div class="kpi-badge" [ngClass]="'badge-' + badgeType" *ngIf="badge">
+        {{ badge }}
+      </div>
+    </div>
+
+    <div class="kpi-body">
+      <span class="kpi-label">{{ title }}</span>
+      <div class="kpi-metric-row">
+        <span class="kpi-value">{{ formattedDisplay }}</span>
+      </div>
+      <p class="kpi-subtitle" *ngIf="subtitle">{{ subtitle }}</p>
+    </div>
+
+    <!-- Decorative background wave -->
+    <div class="card-glow"></div>
+  </div>
+</div>

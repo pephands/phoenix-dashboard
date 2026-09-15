@@ -1,0 +1,399 @@
+<div class="layout-wrapper">
+  <!-- Minimal Clean Sidebar -->
+  <aside class="dashboard-sidebar" [class.mobile-open]="mobileNavOpen">
+    <div class="sidebar-brand">
+      <div class="brand-logo-card">
+        <img src="assets/images/online_ventures_logo.png" alt="Online Ventures Private Limited" class="sidebar-ov-logo" />
+        <div class="brand-sub-badge">
+          <span class="pink-ribbon-dot"></span>
+          <span>Pink Marathon 2026</span>
+        </div>
+      </div>
+      <button type="button" class="mobile-close-btn" (click)="toggleMobileNav()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-link" (click)="mobileNavOpen = false">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span>Dashboard</span>
+      </a>
+      <a routerLink="/leads" routerLinkActive="active" class="nav-link" (click)="mobileNavOpen = false">
+        <span class="material-symbols-outlined">groups</span>
+        <span>Marathon Leads</span>
+      </a>
+      <a *ngIf="canManageLeadCounts" routerLink="/lead-counts" routerLinkActive="active" class="nav-link" (click)="mobileNavOpen = false">
+        <span class="material-symbols-outlined">edit_note</span>
+        <span>Update Lead Counts</span>
+        <span class="nav-role-badge">Admin</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar">
+          <span class="material-symbols-outlined">person</span>
+        </div>
+        <div class="user-details">
+          <span class="user-name">Marathon Admin</span>
+          <span class="user-status">Awareness Coordinator</span>
+        </div>
+      </div>
+      <button type="button" class="btn-logout" (click)="logout()" title="Logout">
+        <span class="material-symbols-outlined">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="mobile-backdrop" *ngIf="mobileNavOpen" (click)="toggleMobileNav()"></div>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <header class="top-nav-bar">
+      <div class="left-nav">
+        <button type="button" class="menu-toggle-btn" (click)="toggleMobileNav()">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+      </div>
+
+      <div class="right-nav">
+        <button type="button" class="btn-refresh" (click)="loadLeads()">
+          <span class="material-symbols-outlined">refresh</span>
+          <span>Refresh Leads</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="dashboard-content-area">
+      <!-- Page Header Card -->
+      <section class="leads-header-card">
+        <div class="header-intro">
+          <div>
+            <h1>Marathon Leads & Registrations</h1>
+            <p class="subtitle">Complete directory of campaign participants, outreach inquiries, and confirmed runners.</p>
+          </div>
+          <div class="header-badge">
+            <span class="total-lead-count">{{ totalCount }}</span>
+            <span class="total-lead-lbl">Total Records</span>
+          </div>
+        </div>
+
+        <!-- Filter & Search Controls Bar -->
+        <div class="leads-controls-bar">
+          <!-- Search input -->
+          <div class="search-box">
+            <span class="material-symbols-outlined search-icon">search</span>
+            <input
+              type="text"
+              placeholder="Search by name, phone, email, or registration ID..."
+              (input)="onSearchInput($event)"
+              [value]="searchTerm"
+            />
+          </div>
+
+          <!-- Filters -->
+          <div class="filters-cluster">
+            <!-- Status filter -->
+            <div class="select-group">
+              <label>Status</label>
+              <select (change)="onStatusChange($any($event.target).value)" [value]="selectedStatus">
+                <option value="all">All Statuses</option>
+                <option value="registered">Registered / Confirmed</option>
+                <option value="interested">Interested / In Progress</option>
+              </select>
+            </div>
+
+            <!-- Category filter -->
+            <div class="select-group" *ngIf="categories.length > 0">
+              <label>Category</label>
+              <select (change)="onCategoryChange($any($event.target).value)" [value]="selectedCategory">
+                <option value="all">All Categories</option>
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+
+            <!-- Source filter -->
+            <div class="select-group" *ngIf="sources.length > 0">
+              <label>Source</label>
+              <select (change)="onSourceChange($any($event.target).value)" [value]="selectedSource">
+                <option value="all">All Sources</option>
+                <option *ngFor="let src of sources" [value]="src">{{ src }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Leads Data Table Card -->
+      <section class="leads-table-card">
+        <div class="table-responsive">
+          <table class="leads-table">
+            <thead>
+              <tr>
+                <th>Registration ID</th>
+                <th>Runner / Lead Name</th>
+                <th>Contact Details</th>
+                <th>Category</th>
+                <th>Source</th>
+                <th>Status</th>
+                <th>Registered Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Loading Skeleton -->
+              <tr *ngIf="loading">
+                <td colspan="8" class="loading-cell">
+                  <div class="table-spinner"></div>
+                  <span>Loading marathon records...</span>
+                </td>
+              </tr>
+
+              <!-- Empty State -->
+              <tr *ngIf="!loading && filteredLeads.length === 0">
+                <td colspan="8" class="empty-cell">
+                  <span class="material-symbols-outlined empty-icon">person_search</span>
+                  <p>No marathon leads or registrations match your filter criteria.</p>
+                </td>
+              </tr>
+
+              <!-- Data Rows -->
+              <tr *ngFor="let lead of filteredLeads" (click)="openLeadDrawer(lead)">
+                <td>
+                  <span class="reg-id-badge">{{ lead.registration_id || 'CPR-NEW' }}</span>
+                </td>
+                <td>
+                  <div class="name-cell">
+                    <span class="runner-name">{{ lead.name || 'Anonymous' }}</span>
+                    <span class="runner-area" *ngIf="lead.area">{{ lead.area }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="contact-cell">
+                    <span class="contact-phone">{{ lead.phone || '—' }}</span>
+                    <span class="contact-email">{{ lead.email || '—' }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="category-pill">{{ lead.category || 'General' }}</span>
+                </td>
+                <td>
+                  <span class="source-tag">{{ lead.source || 'Website' }}</span>
+                </td>
+                <td>
+                  <span class="status-pill" [class.status-reg]="lead.is_paid" [class.status-lead]="!lead.is_paid">
+                    <span class="dot"></span>
+                    <span>{{ lead.is_paid ? 'Registered' : 'Interested' }}</span>
+                  </span>
+                </td>
+                <td>
+                  <span class="date-cell">{{ lead.created_at | date:'mediumDate' }}</span>
+                </td>
+                <td>
+                  <button type="button" class="btn-view" (click)="openLeadDrawer(lead); $event.stopPropagation()">
+                    <span>Details</span>
+                    <span class="material-symbols-outlined">chevron_right</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div class="pagination-bar" *ngIf="totalPages > 1">
+          <div class="pagination-info">
+            Showing Page <strong>{{ currentPage }}</strong> of <strong>{{ totalPages }}</strong> ({{ totalCount }} records)
+          </div>
+          <div class="pagination-actions">
+            <button
+              type="button"
+              class="page-btn"
+              [disabled]="currentPage === 1"
+              (click)="goToPage(currentPage - 1)"
+            >
+              <span class="material-symbols-outlined">chevron_left</span>
+              <span>Previous</span>
+            </button>
+            <button
+              type="button"
+              class="page-btn"
+              [disabled]="currentPage === totalPages"
+              (click)="goToPage(currentPage + 1)"
+            >
+              <span>Next</span>
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Leads Footer Credit -->
+      <footer class="dashboard-page-footer">
+        <p>
+          <span>Breast Cancer Awareness Marathon Campaign Command Center</span>
+          <span class="footer-bullet">•</span>
+          <span>Developed & Maintained by <a href="https://phonlineventures.com/" target="_blank" rel="noopener noreferrer">PH Online Ventures Pvt Ltd</a></span>
+        </p>
+      </footer>
+    </div>
+  </main>
+
+  <!-- Sliding Lead Details Drawer -->
+  <div class="drawer-backdrop" *ngIf="drawerOpen" (click)="closeDrawer()"></div>
+  <aside class="lead-detail-drawer" [class.open]="drawerOpen" *ngIf="selectedLead">
+    <div class="drawer-header">
+      <div class="drawer-header-left">
+        <div class="drawer-avatar">
+          <span class="material-symbols-outlined">directions_run</span>
+        </div>
+        <div>
+          <h3>{{ selectedLead.name || 'Anonymous Runner' }}</h3>
+          <span class="reg-id-text">{{ selectedLead.registration_id }}</span>
+        </div>
+      </div>
+      <button type="button" class="drawer-close-btn" (click)="closeDrawer()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="drawer-content">
+      <!-- Status Banner -->
+      <div class="drawer-status-card" [class.status-confirmed]="selectedLead.is_paid">
+        <div class="status-icon">
+          <span class="material-symbols-outlined">{{ selectedLead.is_paid ? 'verified' : 'pending' }}</span>
+        </div>
+        <div class="status-info">
+          <h4>{{ selectedLead.is_paid ? 'Confirmed Marathon Participant' : 'Awareness Inquirer / Interested Lead' }}</h4>
+          <p>{{ selectedLead.is_paid ? 'Completed runner registration for the marathon.' : 'Engaged in awareness campaign. Follow-up active.' }}</p>
+        </div>
+      </div>
+
+      <!-- Section: Personal Details -->
+      <div class="drawer-section">
+        <div class="section-title">
+          <span class="material-symbols-outlined">person</span>
+          <span>Personal Details</span>
+        </div>
+        <div class="details-grid">
+          <div class="detail-item">
+            <span class="d-label">Full Name</span>
+            <span class="d-val">{{ selectedLead.name || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="d-label">Phone Number</span>
+            <span class="d-val">{{ selectedLead.phone || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="d-label">Email Address</span>
+            <span class="d-val">{{ selectedLead.email || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="d-label">Area / City</span>
+            <span class="d-val">{{ selectedLead.area || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="d-label">Date of Birth</span>
+            <span class="d-val">{{ selectedLead.date_of_birth || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="d-label">Age</span>
+            <span class="d-val">{{ selectedLead.age ? (selectedLead.age + ' yrs') : '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="d-label">Blood Group</span>
+            <span class="d-val">{{ selectedLead.blood_group || '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="d-label">T-Shirt Size</span>
+            <span class="d-val">{{ selectedLead.tshirt_size || '—' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Campaign & Runner Details -->
+      <div class="drawer-section">
+        <div class="section-title">
+          <span class="material-symbols-outlined">sports_score</span>
+          <span>Marathon Specifications</span>
+        </div>
+        <div class="details-grid">
+          <div class="detail-item">
+            <span class="d-label">Category</span>
+            <span class="d-val">{{ selectedLead.category || 'General' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="d-label">Campaign Source</span>
+            <span class="d-val">{{ selectedLead.source || 'Website' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="d-label">Bib Number</span>
+            <span class="d-val">{{ selectedLead.bib_number || 'Pending Allocation' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="d-label">Bib Center</span>
+            <span class="d-val">{{ selectedLead.bib_collection_center || 'To Be Assigned' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="d-label">Bib Status</span>
+            <span class="d-val">{{ selectedLead.bib_collection_status || 'Pending' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="d-label">Created Timestamp</span>
+            <span class="d-val">{{ selectedLead.created_at | date:'medium' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Lead Progression Activity Timeline -->
+      <div class="drawer-section">
+        <div class="section-title">
+          <span class="material-symbols-outlined">timeline</span>
+          <span>Progression Timeline</span>
+        </div>
+        <div class="drawer-timeline">
+          <!-- Step 1 -->
+          <div class="drawer-step active">
+            <div class="step-dot"><span class="material-symbols-outlined">add_circle</span></div>
+            <div class="step-content">
+              <h5>Lead Created</h5>
+              <p>Sign-up inquiry registered in campaign portal</p>
+              <span class="step-time">{{ selectedLead.created_at | date:'mediumDate' }}</span>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="drawer-step active">
+            <div class="step-dot"><span class="material-symbols-outlined">favorite</span></div>
+            <div class="step-content">
+              <h5>Interested Runner</h5>
+              <p>Expressed interest in {{ selectedLead.category || 'Marathon' }}</p>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="drawer-step" [class.active]="selectedLead.is_paid">
+            <div class="step-dot"><span class="material-symbols-outlined">how_to_reg</span></div>
+            <div class="step-content">
+              <h5>Converted</h5>
+              <p>{{ selectedLead.is_paid ? 'Entry verified & participation confirmed' : 'Awaiting confirmation' }}</p>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="drawer-step" [class.active]="selectedLead.is_paid">
+            <div class="step-dot"><span class="material-symbols-outlined">check_circle</span></div>
+            <div class="step-content">
+              <h5>Registered Marathoner</h5>
+              <p>{{ selectedLead.is_paid ? 'Official runner registration completed' : 'Pending final registration' }}</p>
+              <span class="step-time" *ngIf="selectedLead.paid_date">{{ selectedLead.paid_date | date:'mediumDate' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>

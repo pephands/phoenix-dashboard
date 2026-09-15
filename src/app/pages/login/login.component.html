@@ -1,0 +1,143 @@
+<div class="login-wrapper">
+  <!-- Dynamic ambient background elements -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <!-- Decorative floating background elements -->
+  <div class="floating-decorations">
+    <div class="float-circle c-1"></div>
+    <div class="float-circle c-2"></div>
+  </div>
+
+  <div class="single-login-container">
+    <div class="login-card">
+      <!-- Top Brand Header with Online Ventures Logo -->
+      <div class="brand-header">
+        <div class="logo-wrapper">
+          <img
+            src="assets/images/online_ventures_logo.png"
+            alt="Online Ventures Private Limited"
+            class="brand-logo"
+          />
+        </div>
+
+        <div class="campaign-pill">
+          <svg class="pink-ribbon-icon" viewBox="0 0 100 120" width="16" height="20">
+            <defs>
+              <linearGradient id="loginRibbonPink" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fda4af" />
+                <stop offset="40%" stop-color="#fb7185" />
+                <stop offset="100%" stop-color="#e11d48" />
+              </linearGradient>
+            </defs>
+            <path d="M30,70 C15,50 20,20 50,20 C80,20 85,50 70,70 L85,110 L65,95 L50,80 L35,95 L15,110 Z" fill="url(#loginRibbonPink)" />
+            <path d="M50,20 C65,20 75,35 70,55 C65,75 50,80 50,80 C50,80 35,75 30,55 C25,35 35,20 50,20 Z" fill="#be123c" opacity="0.45" />
+          </svg>
+          <span>Breast Cancer Awareness Marathon 2026</span>
+        </div>
+      </div>
+
+      <div class="form-title-section">
+        <h2>Sign In to Dashboard</h2>
+        <p>Enter your credentials to access campaign analytics and runner registrations.</p>
+      </div>
+
+      <!-- Error banner -->
+      <div class="error-banner" *ngIf="errorMessage">
+        <span class="material-symbols-outlined error-icon">error</span>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <!-- Single-side form: Username and Password only -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form" novalidate>
+        <!-- Username/Email Field -->
+        <div class="form-group">
+          <label for="username">Username or Email</label>
+          <div class="input-wrap" [class.input-error]="loginForm.get('username')?.touched && loginForm.get('username')?.invalid">
+            <span class="material-symbols-outlined input-icon">person</span>
+            <input
+              type="text"
+              id="username"
+              formControlName="username"
+              placeholder="Enter your username or email"
+              autocomplete="username"
+            />
+          </div>
+          <div class="field-error" *ngIf="loginForm.get('username')?.touched && loginForm.get('username')?.errors?.['required']">
+            Username is required.
+          </div>
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrap" [class.input-error]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
+            <span class="material-symbols-outlined input-icon">lock</span>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              formControlName="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="eye-btn"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            >
+              <span class="material-symbols-outlined">
+                {{ showPassword ? 'visibility_off' : 'visibility' }}
+              </span>
+            </button>
+          </div>
+          <div class="field-error" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.errors?.['required']">
+            Password is required.
+          </div>
+        </div>
+
+        <!-- Remember Me Checkbox -->
+        <div class="form-row-options">
+          <label class="checkbox-container">
+            <input type="checkbox" formControlName="rememberMe" />
+            <span class="checkmark"></span>
+            <span class="checkbox-label">Remember me on this device</span>
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          class="btn-login"
+          [disabled]="loading || loginForm.invalid"
+        >
+          <span class="spinner" *ngIf="loading"></span>
+          <span class="btn-text" *ngIf="!loading">
+            <span>Sign In to Dashboard</span>
+            <span class="material-symbols-outlined btn-arrow">arrow_forward</span>
+          </span>
+        </button>
+      </form>
+
+      <!-- Security Badge -->
+      <div class="security-badge">
+        <span class="material-symbols-outlined">verified_user</span>
+        <span>Secured Campaign Administration Portal</span>
+      </div>
+
+      <!-- Developed & Maintained by Credit -->
+      <div class="company-credit">
+        <span>Developed & Maintained by</span>
+        <a
+          href="https://phonlineventures.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="credit-link"
+        >
+          PH Online Ventures Pvt Ltd
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,269 @@
+.marathon-visual-track {
+  background: linear-gradient(135deg, rgba(255, 241, 245, 0.8) 0%, rgba(253, 242, 248, 0.6) 100%);
+  border: 1px solid rgba(244, 114, 182, 0.25);
+  border-radius: 18px;
+  padding: 18px 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(244, 63, 94, 0.05);
+}
+
+.track-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ribbon-badge {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cancer-ribbon-svg {
+  animation: ribbonWave 4s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes ribbonWave {
+  0% { transform: scale(1) rotate(-3deg); }
+  50% { transform: scale(1.06) rotate(3deg); }
+  100% { transform: scale(1) rotate(-3deg); }
+}
+
+.campaign-pulse-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  padding: 6px 14px;
+  border-radius: 30px;
+  box-shadow: 0 2px 8px rgba(233, 30, 99, 0.1);
+  border: 1px solid rgba(244, 114, 182, 0.3);
+}
+
+.pulse-dot {
+  width: 9px;
+  height: 9px;
+  background: #e11d48;
+  border-radius: 50%;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 50%;
+    border: 2px solid #f43f5e;
+    animation: heartbeatPulse 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+  }
+}
+
+@keyframes heartbeatPulse {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  50% { transform: scale(1.6); opacity: 0.3; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.pulse-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #be123c;
+  letter-spacing: 0.3px;
+}
+
+.track-status-summary {
+  font-size: 12px;
+  color: #64748b;
+  .tag-title {
+    font-weight: 700;
+    color: #334155;
+    margin-right: 5px;
+  }
+  .tag-desc {
+    color: #e11d48;
+    font-weight: 600;
+  }
+}
+
+.route-line-wrapper {
+  position: relative;
+  padding: 10px 0 6px;
+}
+
+.route-milestones {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 3;
+}
+
+.milestone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  .milestone-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #fda4af;
+    color: #e11d48;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+
+    span {
+      font-size: 16px;
+    }
+  }
+
+  .milestone-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  &.active {
+    .milestone-dot {
+      background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
+      border-color: #ffffff;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.35);
+    }
+    .milestone-label {
+      color: #be123c;
+    }
+  }
+}
+
+.track-svg-container {
+  position: relative;
+  width: 100%;
+  height: 36px;
+  margin-top: -24px;
+  z-index: 2;
+}
+
+.track-svg {
+  width: 100%;
+  height: 100%;
+
+  .track-bg-line {
+    fill: none;
+    stroke: #fbcfe8;
+    stroke-width: 3;
+    stroke-dasharray: 6 6;
+  }
+
+  .track-progress-line {
+    fill: none;
+    stroke: #e11d48;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    animation: dashProgress 30s linear infinite;
+  }
+}
+
+.runner-figure {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  animation: runnerGlide 14s ease-in-out infinite alternate;
+}
+
+.runner-avatar {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+
+  .runner-icon {
+    font-size: 26px;
+    color: #be123c;
+    background: #ffffff;
+    border: 2px solid #e11d48;
+    border-radius: 50%;
+    padding: 3px;
+    box-shadow: 0 4px 10px rgba(225, 29, 72, 0.3);
+    animation: runnerStride 0.45s ease-in-out infinite alternate;
+  }
+
+  .runner-shadow {
+    width: 16px;
+    height: 3px;
+    background: rgba(190, 18, 60, 0.25);
+    border-radius: 50%;
+    margin-top: 1px;
+    animation: shadowPulse 0.45s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes runnerGlide {
+  0% {
+    transform: translateX(3%);
+  }
+  100% {
+    transform: translateX(88%);
+  }
+}
+
+@keyframes runnerStride {
+  0% {
+    transform: translateY(0px) rotate(-4deg);
+  }
+  100% {
+    transform: translateY(-5px) rotate(4deg);
+  }
+}
+
+@keyframes shadowPulse {
+  0% {
+    transform: scaleX(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scaleX(0.7);
+    opacity: 0.15;
+  }
+}
+
+@media (max-width: 640px) {
+  .marathon-visual-track {
+    padding: 14px 16px;
+  }
+  .track-status-summary {
+    display: none;
+  }
+  .milestone-label {
+    display: none;
+  }
+  .milestone .milestone-dot {
+    width: 26px;
+    height: 26px;
+    span {
+      font-size: 13px;
+    }
+  }
+  .track-svg-container {
+    margin-top: -14px;
+  }
+  .runner-avatar .runner-icon {
+    font-size: 18px;
+    padding: 2px;
+  }
+}

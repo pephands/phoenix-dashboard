@@ -1,0 +1,237 @@
+.kpi-card {
+  position: relative;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(244, 114, 182, 0.18);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(233, 30, 99, 0.12), 0 4px 10px rgba(0, 0, 0, 0.03);
+    border-color: rgba(233, 30, 99, 0.35);
+
+    .card-glow {
+      opacity: 0.85;
+      transform: scale(1.15);
+    }
+
+    .icon-bubble {
+      transform: scale(1.08) rotate(3deg);
+    }
+  }
+}
+
+.kpi-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.icon-bubble {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+
+  span {
+    font-size: 24px;
+  }
+}
+
+.kpi-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+
+  &.badge-primary {
+    background: rgba(233, 30, 99, 0.1);
+    color: #d81b60;
+  }
+
+  &.badge-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+  }
+
+  &.badge-warning {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+  }
+
+  &.badge-neutral {
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+}
+
+.kpi-body {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+}
+
+.kpi-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 6px;
+}
+
+.kpi-metric-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.kpi-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+}
+
+.kpi-subtitle {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-glow {
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.4;
+  filter: blur(28px);
+  transition: all 0.4s ease;
+  z-index: 1;
+}
+
+/* Color Themes */
+.theme-pink {
+  .icon-bubble {
+    background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+    color: #e11d48;
+  }
+  .card-glow { background: #f472b6; }
+}
+
+.theme-rose {
+  .icon-bubble {
+    background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
+    color: #e11d48;
+  }
+  .card-glow { background: #fb7185; }
+}
+
+.theme-fuchsia {
+  .icon-bubble {
+    background: linear-gradient(135deg, #fae8ff 0%, #f5d0fe 100%);
+    color: #c026d3;
+  }
+  .card-glow { background: #e879f9; }
+}
+
+.theme-emerald {
+  .icon-bubble {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #059669;
+  }
+  .card-glow { background: #34d399; }
+}
+
+.theme-amber {
+  .icon-bubble {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #d97706;
+  }
+  .card-glow { background: #fbbf24; }
+}
+
+.theme-violet {
+  .icon-bubble {
+    background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+    color: #7c3aed;
+  }
+  .card-glow { background: #a78bfa; }
+}
+
+/* Skeleton State */
+.kpi-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .skeleton-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .skeleton-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+  }
+
+  .skeleton-badge {
+    width: 60px;
+    height: 20px;
+    border-radius: 10px;
+  }
+
+  .skeleton-title {
+    width: 90px;
+    height: 14px;
+    border-radius: 4px;
+  }
+
+  .skeleton-value {
+    width: 140px;
+    height: 32px;
+    border-radius: 6px;
+  }
+
+  .skeleton-sub {
+    width: 110px;
+    height: 12px;
+    border-radius: 4px;
+  }
+
+  .pulse {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: pulseGlow 1.5s infinite;
+  }
+}
+
+@keyframes pulseGlow {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

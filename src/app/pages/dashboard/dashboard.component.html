@@ -1,0 +1,399 @@
+<div class="layout-wrapper">
+  <!-- Minimal Clean Sidebar -->
+  <aside class="dashboard-sidebar" [class.mobile-open]="mobileNavOpen">
+    <div class="sidebar-brand">
+      <div class="brand-logo-card">
+        <img src="assets/images/online_ventures_logo.png" alt="Online Ventures Private Limited" class="sidebar-ov-logo" />
+        <div class="brand-sub-badge">
+          <span class="pink-ribbon-dot"></span>
+          <span>Pink Marathon 2026</span>
+        </div>
+      </div>
+      <button type="button" class="mobile-close-btn" (click)="toggleMobileNav()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="sidebar-nav">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-link" (click)="mobileNavOpen = false">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span>Dashboard</span>
+      </a>
+      <a routerLink="/leads" routerLinkActive="active" class="nav-link" (click)="mobileNavOpen = false">
+        <span class="material-symbols-outlined">groups</span>
+        <span>Marathon Leads</span>
+      </a>
+      <a *ngIf="canManageLeadCounts" routerLink="/lead-counts" routerLinkActive="active" class="nav-link" (click)="mobileNavOpen = false">
+        <span class="material-symbols-outlined">edit_note</span>
+        <span>Update Lead Counts</span>
+        <span class="nav-role-badge">Admin</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar">
+          <span class="material-symbols-outlined">person</span>
+        </div>
+        <div class="user-details">
+          <span class="user-name">Marathon Admin</span>
+          <span class="user-status">Awareness Coordinator</span>
+        </div>
+      </div>
+      <button type="button" class="btn-logout" (click)="logout()" title="Logout">
+        <span class="material-symbols-outlined">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Backdrop for mobile drawer -->
+  <div class="mobile-backdrop" *ngIf="mobileNavOpen" (click)="toggleMobileNav()"></div>
+
+  <!-- Main Content View -->
+  <main class="dashboard-main">
+    <!-- Top Bar for mobile / quick user actions -->
+    <header class="top-nav-bar">
+      <div class="left-nav">
+        <button type="button" class="menu-toggle-btn" (click)="toggleMobileNav()" aria-label="Toggle menu">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+      </div>
+
+      <div class="right-nav">
+        <button type="button" class="btn-refresh" (click)="loadDashboardData()" [disabled]="refreshing">
+          <span class="material-symbols-outlined" [class.spin]="refreshing">refresh</span>
+          <span class="hide-mobile">{{ refreshing ? 'Updating...' : 'Refresh Live Data' }}</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="dashboard-content-area">
+
+      <!-- ERROR STATE -->
+      <div class="alert-error-card" *ngIf="error">
+        <span class="material-symbols-outlined">cloud_off</span>
+        <div class="error-text">
+          <h3>Failed to synchronize campaign data</h3>
+          <p>{{ errorMessage }}</p>
+        </div>
+        <button type="button" class="btn-retry" (click)="loadDashboardData()">
+          Retry Connection
+        </button>
+      </div>
+
+      <!-- KPI COUNT CARDS (8 Animated Count Cards) -->
+      <section class="kpi-section">
+        <div class="kpi-grid">
+          <!-- 1. Total Leads -->
+          <app-kpi-card
+            title="Total Leads"
+            [value]="metrics.totalLeads"
+            icon="campaign"
+            subtitle="Campaign signups & inquiries"
+            badge="Top Funnel"
+            badgeType="primary"
+            colorTheme="pink"
+            [loading]="loading"
+          ></app-kpi-card>
+
+          <!-- 2. Interested Leads -->
+          <app-kpi-card
+            title="Interested Leads"
+            [value]="metrics.interestedLeads"
+            icon="favorite"
+            subtitle="Engaged in runner outreach"
+            badge="In Discussion"
+            badgeType="warning"
+            colorTheme="amber"
+            [loading]="loading"
+          ></app-kpi-card>
+
+          <!-- 3. Converted Leads -->
+          <app-kpi-card
+            title="Converted Leads"
+            [value]="metrics.convertedLeads"
+            icon="how_to_reg"
+            subtitle="Verified participation entries"
+            badge="Confirmed"
+            badgeType="success"
+            colorTheme="emerald"
+            [loading]="loading"
+          ></app-kpi-card>
+
+          <!-- 4. Total Registrations -->
+          <app-kpi-card
+            title="Total Registrations"
+            [value]="metrics.totalRegistrations"
+            icon="directions_run"
+            subtitle="Official registered marathon runners"
+            badge="Official Runners"
+            badgeType="primary"
+            colorTheme="rose"
+            [loading]="loading"
+          ></app-kpi-card>
+
+          <!-- 5. Today's Leads -->
+          <app-kpi-card
+            title="Today's Leads"
+            [value]="metrics.todayLeads"
+            icon="event_note"
+            subtitle="Inquiries received today"
+            badge="Live Today"
+            badgeType="neutral"
+            colorTheme="violet"
+            [loading]="loading"
+          ></app-kpi-card>
+
+          <!-- 6. Today's Registrations -->
+          <app-kpi-card
+            title="Today's Registrations"
+            [value]="metrics.todayRegistrations"
+            icon="today"
+            subtitle="Runners confirmed today"
+            badge="Fresh Today"
+            badgeType="success"
+            colorTheme="fuchsia"
+            [loading]="loading"
+          ></app-kpi-card>
+
+          <!-- 7. Conversion Rate -->
+          <app-kpi-card
+            title="Conversion Rate"
+            [value]="metrics.conversionRate"
+            icon="speed"
+            format="percentage"
+            subtitle="Leads converted to registered runners"
+            badge="Efficiency"
+            badgeType="success"
+            colorTheme="emerald"
+            [loading]="loading"
+          ></app-kpi-card>
+
+          <!-- 8. Active Leads -->
+          <app-kpi-card
+            title="Active Leads"
+            [value]="metrics.activeLeads"
+            icon="touch_app"
+            subtitle="Currently undergoing follow-up"
+            badge="In Progress"
+            badgeType="warning"
+            colorTheme="pink"
+            [loading]="loading"
+          ></app-kpi-card>
+        </div>
+      </section>
+
+      <!-- LEAD FUNNEL GRAPH -->
+      <section class="funnel-section">
+        <div class="section-card">
+          <div class="card-header">
+            <div class="header-title-group">
+              <span class="material-symbols-outlined section-icon">filter_alt</span>
+              <div>
+                <h2>Marathon Lead Funnel</h2>
+                <p class="section-subtitle">Progression breakdown from campaign awareness to registered marathoners</p>
+              </div>
+            </div>
+            <span class="funnel-rate-badge" *ngIf="!loading">
+              {{ metrics.conversionRate }}% Overall Conversion
+            </span>
+          </div>
+
+          <!-- Interactive Funnel Stages -->
+          <div class="funnel-grid" *ngIf="!loading">
+            <div
+              *ngFor="let stage of funnelStages; let i = index; let last = last"
+              class="funnel-stage-card"
+            >
+              <div class="stage-step-indicator">
+                <span class="step-num">0{{ i + 1 }}</span>
+                <span class="stage-badge">{{ stage.badge }}</span>
+              </div>
+
+              <div class="stage-icon-wrap" [style.background]="stage.color">
+                <span class="material-symbols-outlined">{{ stage.icon }}</span>
+              </div>
+
+              <div class="stage-details">
+                <span class="stage-label">{{ stage.label }}</span>
+                <h3 class="stage-count">{{ stage.count | number }}</h3>
+                <span class="stage-name">{{ stage.stageName }}</span>
+              </div>
+
+              <!-- Funnel bar representation -->
+              <div class="stage-progress-bar">
+                <div
+                  class="progress-fill"
+                  [style.width.%]="stage.percentage"
+                  [style.background]="stage.color"
+                ></div>
+              </div>
+              <span class="stage-pct-text">{{ stage.percentage }}% of campaign total</span>
+
+              <!-- Funnel connector arrow -->
+              <div class="funnel-arrow hide-mobile" *ngIf="!last">
+                <span class="material-symbols-outlined">arrow_forward</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TREND & DISTRIBUTION GRAPHS (2x2 Grid) -->
+      <section class="charts-grid-section">
+        <!-- 1. REGISTRATION TREND GRAPH -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <h3>Registration Trend</h3>
+              <p class="chart-subtitle">Confirmed runner signups across selected timeframe</p>
+            </div>
+            <div class="granularity-toggles">
+              <button
+                type="button"
+                [class.active]="regTrendGranularity === 'daily'"
+                (click)="changeRegTrendGranularity('daily')"
+              >
+                Daily
+              </button>
+              <button
+                type="button"
+                [class.active]="regTrendGranularity === 'weekly'"
+                (click)="changeRegTrendGranularity('weekly')"
+              >
+                Weekly
+              </button>
+              <button
+                type="button"
+                [class.active]="regTrendGranularity === 'monthly'"
+                (click)="changeRegTrendGranularity('monthly')"
+              >
+                Monthly
+              </button>
+            </div>
+          </div>
+
+          <div class="chart-body">
+            <canvas #regTrendCanvas></canvas>
+          </div>
+        </div>
+
+        <!-- 2. LEAD TREND GRAPH -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <h3>Lead Trend</h3>
+              <p class="chart-subtitle">Lead volume & awareness campaign inquiries over time</p>
+            </div>
+            <div class="granularity-toggles">
+              <button
+                type="button"
+                [class.active]="leadTrendGranularity === 'daily'"
+                (click)="changeLeadTrendGranularity('daily')"
+              >
+                Daily
+              </button>
+              <button
+                type="button"
+                [class.active]="leadTrendGranularity === 'weekly'"
+                (click)="changeLeadTrendGranularity('weekly')"
+              >
+                Weekly
+              </button>
+              <button
+                type="button"
+                [class.active]="leadTrendGranularity === 'monthly'"
+                (click)="changeLeadTrendGranularity('monthly')"
+              >
+                Monthly
+              </button>
+            </div>
+          </div>
+
+          <div class="chart-body">
+            <canvas #leadTrendCanvas></canvas>
+          </div>
+        </div>
+
+        <!-- 3. LEAD SOURCE GRAPH (Full Width) -->
+        <div class="chart-card source-chart-card">
+          <div class="chart-header">
+            <div>
+              <h3>Lead Acquisition Source</h3>
+              <p class="chart-subtitle">Leads and registrations generated per channel (Meta Ads, Website, Referrals)</p>
+            </div>
+          </div>
+
+          <div class="chart-body">
+            <canvas #sourceCanvas></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- RECENT MARATHON ACTIVITY SECTION -->
+      <section class="activity-section">
+        <div class="section-card">
+          <div class="card-header">
+            <div class="header-title-group">
+              <span class="material-symbols-outlined section-icon">history</span>
+              <div>
+                <h2>Recent Marathon Activity</h2>
+                <p class="section-subtitle">Real-time awareness inquiries and registration updates</p>
+              </div>
+            </div>
+            <a routerLink="/leads" class="view-all-leads-link">
+              <span>View All Marathon Leads</span>
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </a>
+          </div>
+
+          <div class="activity-timeline" *ngIf="recentActivities.length > 0">
+            <div
+              *ngFor="let act of recentActivities"
+              class="timeline-item"
+              [class.item-registered]="act.type === 'registered'"
+            >
+              <div class="timeline-indicator">
+                <span class="timeline-dot"></span>
+                <span class="timeline-line"></span>
+              </div>
+
+              <div class="timeline-card">
+                <div class="timeline-left">
+                  <span class="act-badge" [class.badge-reg]="act.type === 'registered'">
+                    {{ act.statusBadge }}
+                  </span>
+                  <h4 class="act-title">{{ act.title }}</h4>
+                  <p class="act-desc">{{ act.description }}</p>
+                </div>
+
+                <div class="timeline-right">
+                  <span class="act-time">{{ act.timestamp }}</span>
+                  <span class="act-time-ago" *ngIf="act.timeAgo">({{ act.timeAgo }})</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty Activity State -->
+          <div class="empty-state-box" *ngIf="!loading && recentActivities.length === 0">
+            <span class="material-symbols-outlined empty-icon">sentiment_satisfied</span>
+            <p>No recent activity recorded for the selected filter range.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dashboard Footer Credit -->
+      <footer class="dashboard-page-footer">
+        <p>
+          <span>Breast Cancer Awareness Marathon Campaign Command Center</span>
+          <span class="footer-bullet">•</span>
+          <span>Developed & Maintained by <a href="https://phonlineventures.com/" target="_blank" rel="noopener noreferrer">PH Online Ventures Pvt Ltd</a></span>
+        </p>
+      </footer>
+    </div>
+  </main>
+</div>

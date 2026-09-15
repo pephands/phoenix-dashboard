@@ -1,0 +1,469 @@
+<div class="lead-counts-layout">
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="counts-sidebar" [class.open]="mobileNavOpen">
+    <!-- Sidebar Brand -->
+    <div class="sidebar-brand">
+      <div class="brand-logo-card">
+        <img src="assets/images/online_ventures_logo.png" alt="Online Ventures Private Limited" class="sidebar-ov-logo" />
+        <div class="brand-sub-badge">
+          <span class="pink-dot"></span>
+          <span>Pink Marathon 2026</span>
+        </div>
+      </div>
+      <button type="button" class="mobile-close-btn" (click)="toggleMobileNav()" aria-label="Close menu">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="sidebar-nav">
+
+      <a routerLink="/dashboard" class="nav-item">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span>Dashboard</span>
+      </a>
+      <a routerLink="/leads" class="nav-item">
+        <span class="material-symbols-outlined">groups</span>
+        <span>Marathon Leads</span>
+      </a>
+      <a routerLink="/lead-counts" class="nav-item active">
+        <span class="material-symbols-outlined">edit_note</span>
+        <span>Update Lead Counts</span>
+        <span class="nav-role-badge">Admin</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar">
+          <span class="material-symbols-outlined">verified_user</span>
+        </div>
+        <div class="user-details">
+          <span class="user-name">{{ userName }}</span>
+          <span class="user-status">{{ userRole }}</span>
+        </div>
+      </div>
+      <button type="button" class="btn-logout" (click)="logout()" title="Logout">
+        <span class="material-symbols-outlined">logout</span>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Mobile Backdrop -->
+  <div class="mobile-backdrop" *ngIf="mobileNavOpen" (click)="toggleMobileNav()"></div>
+
+  <!-- MAIN CONTENT -->
+  <main class="counts-main">
+    <!-- Top Header Bar -->
+    <header class="top-nav-bar">
+      <div class="left-nav">
+        <button type="button" class="menu-toggle-btn" (click)="toggleMobileNav()" aria-label="Toggle menu">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+      </div>
+
+      <div class="right-nav">
+        <button type="button" class="btn-dashboard-link" (click)="goToDashboard()">
+          <span class="material-symbols-outlined">visibility</span>
+          <span class="hide-mobile">View Live Dashboard</span>
+        </button>
+        <button type="button" class="btn-save-header" (click)="saveCampaignData()" [disabled]="saving">
+          <span class="material-symbols-outlined" [class.spin]="saving">save</span>
+          <span>{{ saving ? 'Saving...' : 'Save & Sync' }}</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="counts-content-area">
+      <!-- HERO HEADER CARD -->
+      <section class="counts-hero-card">
+        <div class="hero-header-row">
+          <div class="hero-title-group">
+            <div class="hero-icon-box">
+              <span class="material-symbols-outlined">tune</span>
+            </div>
+            <div>
+              <div class="badge-role-row">
+                <span class="badge-role-pill">
+                  <span class="material-symbols-outlined">shield</span>
+                  Role-Protected Manager
+                </span>
+                <span class="badge-verified-role">{{ userRole }} Access</span>
+                <span class="last-sync-tag" *ngIf="lastSavedAt">
+                  <span class="material-symbols-outlined">done_all</span>
+                  Last Synced: {{ lastSavedAt | date:'mediumTime' }}
+                </span>
+              </div>
+              <h1 class="page-heading">Marathon Lead Counts & Funnel Manager</h1>
+              <p class="page-subtitle">
+                Update and synchronize awareness leads, runner outreach interest, verified conversions, and automatic registration counts directly to the command dashboard.
+              </p>
+            </div>
+          </div>
+
+          <div class="hero-quick-actions">
+            <button type="button" class="btn-action-outline" (click)="resetToDefaults()" title="Reset to standard verified counts">
+              <span class="material-symbols-outlined">restart_alt</span>
+              <span>Load Benchmarks</span>
+            </button>
+            <button type="button" class="btn-action-solid" (click)="saveCampaignData()" [disabled]="saving">
+              <span class="material-symbols-outlined" [class.spin]="saving">cloud_upload</span>
+              <span>{{ saving ? 'Syncing...' : 'Save All Counts' }}</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- LIVE FUNNEL PROGRESSION SIMULATOR -->
+      <section class="funnel-preview-card">
+        <div class="funnel-preview-header">
+          <div class="preview-title">
+            <span class="material-symbols-outlined icon-filter">filter_alt</span>
+            <h3>Live Funnel Progression Breakdown</h3>
+            <span class="preview-note">Preview reflects immediate changes before saving</span>
+          </div>
+          <div class="conversion-pill">
+            <span class="material-symbols-outlined">trending_up</span>
+            <span>Overall Conversion: <strong>{{ convertedPercentage }}%</strong></span>
+          </div>
+        </div>
+
+        <div class="funnel-steps-grid">
+          <!-- Step 1: Total Leads -->
+          <div class="funnel-step-item step-pink">
+            <div class="step-badge">Stage 01 • Top Funnel</div>
+            <div class="step-num-display">
+              <span class="step-count">{{ metaLeadsCount | number }}</span>
+              <span class="step-icon"><span class="material-symbols-outlined">campaign</span></span>
+            </div>
+            <span class="step-name">Awareness Leads</span>
+            <div class="step-progress-track">
+              <div class="step-progress-bar bar-pink" style="width: 100%"></div>
+            </div>
+            <span class="step-pct">100% of campaign total</span>
+          </div>
+
+          <!-- Step 2: Interested Leads -->
+          <div class="funnel-step-item step-amber">
+            <div class="step-badge">Stage 02 • Engaged</div>
+            <div class="step-num-display">
+              <span class="step-count">{{ metaInterestedCount | number }}</span>
+              <span class="step-icon"><span class="material-symbols-outlined">favorite</span></span>
+            </div>
+            <span class="step-name">Interested Runners</span>
+            <div class="step-progress-track">
+              <div class="step-progress-bar bar-amber" [style.width.%]="interestedPercentage"></div>
+            </div>
+            <span class="step-pct">{{ interestedPercentage }}% of campaign total</span>
+          </div>
+
+          <!-- Step 3: Converted Leads -->
+          <div class="funnel-step-item step-emerald">
+            <div class="step-badge">Stage 03 • Converted</div>
+            <div class="step-num-display">
+              <span class="step-count">{{ metaConvertedCount | number }}</span>
+              <span class="step-icon"><span class="material-symbols-outlined">how_to_reg</span></span>
+            </div>
+            <span class="step-name">Conversion In Progress</span>
+            <div class="step-progress-track">
+              <div class="step-progress-bar bar-emerald" [style.width.%]="convertedPercentage"></div>
+            </div>
+            <span class="step-pct">{{ convertedPercentage }}% of campaign total</span>
+          </div>
+
+          <!-- Step 4: Total Registrations -->
+          <div class="funnel-step-item step-rose">
+            <div class="step-badge">Stage 04 • Official Entry</div>
+            <div class="step-num-display">
+              <span class="step-count">{{ activeRegisteredCount | number }}</span>
+              <span class="step-icon"><span class="material-symbols-outlined">directions_run</span></span>
+            </div>
+            <span class="step-name">
+              Confirmed Registrations
+              <span class="auto-synced-dot" *ngIf="autoUpdateRegistrations" title="Auto-updated from live DB">● Auto</span>
+            </span>
+            <div class="step-progress-track">
+              <div class="step-progress-bar bar-rose" [style.width.%]="registeredPercentage"></div>
+            </div>
+            <span class="step-pct">{{ registeredPercentage }}% of campaign total</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- EDITABLE CARDS GRID -->
+      <section class="counts-form-section">
+        <div class="form-cards-grid">
+          <!-- CARD 1: TOTAL LEADS -->
+          <div class="count-edit-card card-pink">
+            <div class="card-header-bar">
+              <div class="card-header-left">
+                <span class="material-symbols-outlined card-icon">campaign</span>
+                <div>
+                  <h3>Total Meta Campaign Leads</h3>
+                  <p>Overall awareness inquiries and social ad leads</p>
+                </div>
+              </div>
+              <span class="stage-tag">Funnel Stage 01</span>
+            </div>
+
+            <div class="card-input-block">
+              <div class="input-display-wrap">
+                <input
+                  type="number"
+                  class="count-number-input"
+                  [(ngModel)]="metaLeadsCount"
+                  min="0"
+                  placeholder="0"
+                />
+                <span class="unit-text">Leads</span>
+              </div>
+
+              <!-- Quick adjustment buttons -->
+              <div class="steppers-row">
+                <button type="button" class="btn-step" (click)="adjustCount('leads', -10)">-10</button>
+                <button type="button" class="btn-step" (click)="adjustCount('leads', -1)">-1</button>
+                <button type="button" class="btn-step" (click)="adjustCount('leads', 1)">+1</button>
+                <button type="button" class="btn-step" (click)="adjustCount('leads', 10)">+10</button>
+              </div>
+            </div>
+            <p class="card-helper-text">
+              * Propagates to Marathon Lead Funnel Stage 01 and the Lead Trend graph.
+            </p>
+          </div>
+
+          <!-- CARD 2: INTERESTED LEADS -->
+          <div class="count-edit-card card-amber">
+            <div class="card-header-bar">
+              <div class="card-header-left">
+                <span class="material-symbols-outlined card-icon">favorite</span>
+                <div>
+                  <h3>Interested / Outreach Leads</h3>
+                  <p>Runners engaged in communication or follow-up</p>
+                </div>
+              </div>
+              <span class="stage-tag">Funnel Stage 02</span>
+            </div>
+
+            <div class="card-input-block">
+              <div class="input-display-wrap">
+                <input
+                  type="number"
+                  class="count-number-input"
+                  [(ngModel)]="metaInterestedCount"
+                  min="0"
+                  placeholder="0"
+                />
+                <span class="unit-text">Runners</span>
+              </div>
+
+              <div class="steppers-row">
+                <button type="button" class="btn-step" (click)="adjustCount('interested', -5)">-5</button>
+                <button type="button" class="btn-step" (click)="adjustCount('interested', -1)">-1</button>
+                <button type="button" class="btn-step" (click)="adjustCount('interested', 1)">+1</button>
+                <button type="button" class="btn-step" (click)="adjustCount('interested', 5)">+5</button>
+              </div>
+            </div>
+            <p class="card-helper-text">
+              * Propagates to Marathon Lead Funnel Stage 02 and Interested Leads KPI card.
+            </p>
+          </div>
+
+          <!-- CARD 3: CONVERTED LEADS -->
+          <div class="count-edit-card card-emerald">
+            <div class="card-header-bar">
+              <div class="card-header-left">
+                <span class="material-symbols-outlined card-icon">how_to_reg</span>
+                <div>
+                  <h3>Converted Leads</h3>
+                  <p>Leads converted to participation entries</p>
+                </div>
+              </div>
+              <span class="stage-tag">Funnel Stage 03</span>
+            </div>
+
+            <div class="card-input-block">
+              <div class="input-display-wrap">
+                <input
+                  type="number"
+                  class="count-number-input"
+                  [(ngModel)]="metaConvertedCount"
+                  min="0"
+                  placeholder="0"
+                />
+                <span class="unit-text">Converted</span>
+              </div>
+
+              <div class="steppers-row">
+                <button type="button" class="btn-step" (click)="adjustCount('converted', -5)">-5</button>
+                <button type="button" class="btn-step" (click)="adjustCount('converted', -1)">-1</button>
+                <button type="button" class="btn-step" (click)="adjustCount('converted', 1)">+1</button>
+                <button type="button" class="btn-step" (click)="adjustCount('converted', 5)">+5</button>
+              </div>
+            </div>
+            <p class="card-helper-text">
+              * Propagates to Marathon Lead Funnel Stage 03 and Converted Leads KPI card.
+            </p>
+          </div>
+
+          <!-- CARD 4: TOTAL REGISTRATIONS WITH AUTO-COUNT -->
+          <div class="count-edit-card card-rose">
+            <div class="card-header-bar">
+              <div class="card-header-left">
+                <span class="material-symbols-outlined card-icon">directions_run</span>
+                <div>
+                  <h3>Total Registrations & Auto-Count</h3>
+                  <p>Confirmed official marathon marathoners</p>
+                </div>
+              </div>
+              <span class="stage-tag">Funnel Stage 04</span>
+            </div>
+
+            <!-- Auto-Count Toggle Option -->
+            <div class="auto-count-card-option" [class.active]="autoUpdateRegistrations">
+              <div class="toggle-option-info">
+                <div class="option-title-row">
+                  <span class="material-symbols-outlined opt-icon">sync</span>
+                  <strong>Total Registrations Auto-Count Option</strong>
+                </div>
+                <span class="opt-desc">
+                  {{ autoUpdateRegistrations
+                    ? 'Active: Automatically synchronizing with live verified database marathoners (' + verifiedDatabaseRegistrations + ' Runners).'
+                    : 'Manual: Custom registration count override enabled.' }}
+                </span>
+              </div>
+              <button
+                type="button"
+                class="btn-toggle-switch"
+                [class.checked]="autoUpdateRegistrations"
+                (click)="toggleAutoCount()"
+              >
+                <span class="toggle-knob"></span>
+                <span class="toggle-text">{{ autoUpdateRegistrations ? 'AUTO ON' : 'MANUAL' }}</span>
+              </button>
+            </div>
+
+            <div class="card-input-block">
+              <div class="input-display-wrap" [class.locked]="autoUpdateRegistrations">
+                <input
+                  type="number"
+                  class="count-number-input"
+                  [(ngModel)]="metaRegisteredCount"
+                  [disabled]="autoUpdateRegistrations"
+                  min="0"
+                  placeholder="0"
+                />
+                <span class="unit-text">Registered</span>
+                <span class="locked-badge" *ngIf="autoUpdateRegistrations">
+                  <span class="material-symbols-outlined">lock</span>
+                  Synced with DB ({{ verifiedDatabaseRegistrations }})
+                </span>
+              </div>
+
+              <div class="steppers-row" *ngIf="!autoUpdateRegistrations">
+                <button type="button" class="btn-step" (click)="adjustCount('registered', -5)">-5</button>
+                <button type="button" class="btn-step" (click)="adjustCount('registered', -1)">-1</button>
+                <button type="button" class="btn-step" (click)="adjustCount('registered', 1)">+1</button>
+                <button type="button" class="btn-step" (click)="adjustCount('registered', 5)">+5</button>
+              </div>
+            </div>
+            <p class="card-helper-text">
+              * Propagates to Total Registrations KPI card and Registration Trend chart.
+            </p>
+          </div>
+
+          <!-- CARD 5: TARGET LEADS GOAL -->
+          <div class="count-edit-card card-violet">
+            <div class="card-header-bar">
+              <div class="card-header-left">
+                <span class="material-symbols-outlined card-icon">flag</span>
+                <div>
+                  <h3>Target Lead Goal</h3>
+                  <p>Milestone campaign target for lead generation</p>
+                </div>
+              </div>
+              <span class="progress-pill">{{ targetPercentage }}% Achieved</span>
+            </div>
+
+            <div class="card-input-block">
+              <div class="input-display-wrap">
+                <input
+                  type="number"
+                  class="count-number-input"
+                  [(ngModel)]="targetLeads"
+                  min="1"
+                  placeholder="1000"
+                />
+                <span class="unit-text">Goal</span>
+              </div>
+
+              <div class="target-meter-wrap">
+                <div class="target-progress-bar" [style.width.%]="targetPercentage"></div>
+              </div>
+            </div>
+            <p class="card-helper-text">
+              * Current: {{ metaLeadsCount }} captured / {{ targetLeads }} target leads.
+            </p>
+          </div>
+
+          <!-- CARD 6: CAMPAIGN DETAILS & REMARKS -->
+          <div class="count-edit-card card-slate">
+            <div class="card-header-bar">
+              <div class="card-header-left">
+                <span class="material-symbols-outlined card-icon">notes</span>
+                <div>
+                  <h3>Campaign Name & Coordinator Notes</h3>
+                  <p>Internal documentation and log records</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-inputs-col">
+              <div class="text-input-group">
+                <label>Campaign Title</label>
+                <input
+                  type="text"
+                  class="text-input"
+                  [(ngModel)]="campaignName"
+                  placeholder="Meta Campaign Title"
+                />
+              </div>
+
+              <div class="text-input-group">
+                <label>Admin Remarks / Change Log</label>
+                <textarea
+                  class="textarea-input"
+                  [(ngModel)]="notes"
+                  rows="3"
+                  placeholder="e.g., Updated lead count from Meta Ads Manager dashboard after weekend awareness drive..."
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTTOM ACTION FOOTER -->
+        <div class="form-footer-actions">
+          <div class="footer-summary">
+            <span class="material-symbols-outlined check-icon">info</span>
+            <span>
+              All adjustments will directly update the Marathon Funnel, Lead Trend (127 Leads), and Registration Trend.
+            </span>
+          </div>
+
+          <div class="footer-btn-group">
+            <button type="button" class="btn-reset" (click)="resetToDefaults()">
+              <span class="material-symbols-outlined">restart_alt</span>
+              <span>Reset Benchmarks</span>
+            </button>
+            <button type="button" class="btn-save-main" (click)="saveCampaignData()" [disabled]="saving">
+              <span class="material-symbols-outlined" [class.spin]="saving">check_circle</span>
+              <span>{{ saving ? 'Saving Changes...' : 'Save & Sync All Metrics' }}</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
