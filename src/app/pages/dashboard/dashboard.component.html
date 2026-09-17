@@ -6,7 +6,7 @@
         <img src="assets/images/online_ventures_logo.png" alt="Online Ventures Private Limited" class="sidebar-ov-logo" />
         <div class="brand-sub-badge">
           <span class="pink-ribbon-dot"></span>
-          <span>Pink Marathon 2026</span>
+          <span>Breast Cancer Awareness Marathon</span>
         </div>
       </div>
       <button type="button" class="mobile-close-btn" (click)="toggleMobileNav()">
@@ -27,7 +27,7 @@
       <a *ngIf="canManageLeadCounts" routerLink="/lead-counts" routerLinkActive="active" class="nav-link" (click)="mobileNavOpen = false">
         <span class="material-symbols-outlined">edit_note</span>
         <span>Update Lead Counts</span>
-        <span class="nav-role-badge">Admin</span>
+        <span class="nav-role-badge">Telecaller</span>
       </a>
     </nav>
 
@@ -38,8 +38,8 @@
           <span class="material-symbols-outlined">person</span>
         </div>
         <div class="user-details">
-          <span class="user-name">Marathon Admin</span>
-          <span class="user-status">Awareness Coordinator</span>
+          <span class="user-name">{{ userName }}</span>
+          <span class="user-status">{{ userRole }}</span>
         </div>
       </div>
       <button type="button" class="btn-logout" (click)="logout()" title="Logout">
@@ -63,10 +63,12 @@
       </div>
 
       <div class="right-nav">
-        <button type="button" class="btn-refresh" (click)="loadDashboardData()" [disabled]="refreshing">
-          <span class="material-symbols-outlined" [class.spin]="refreshing">refresh</span>
-          <span class="hide-mobile">{{ refreshing ? 'Updating...' : 'Refresh Live Data' }}</span>
-        </button>
+        <div class="sync-status-badge">
+          <div class="sync-status-indicator">
+            <span class="pulse-live-dot"></span>
+            <span class="sync-title">Last updated: <strong class="sync-date-value">{{ lastUpdatedDisplay }}</strong></span>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -184,145 +186,25 @@
             [loading]="loading"
           ></app-kpi-card>
         </div>
-      </section>
 
-      <!-- LEAD FUNNEL GRAPH -->
-      <section class="funnel-section">
-        <div class="section-card">
-          <div class="card-header">
-            <div class="header-title-group">
-              <span class="material-symbols-outlined section-icon">filter_alt</span>
-              <div>
-                <h2>Marathon Lead Funnel</h2>
-                <p class="section-subtitle">Progression breakdown from campaign awareness to registered marathoners</p>
-              </div>
-            </div>
-            <span class="funnel-rate-badge" *ngIf="!loading">
-              {{ metrics.conversionRate }}% Overall Conversion
-            </span>
-          </div>
-
-          <!-- Interactive Funnel Stages -->
-          <div class="funnel-grid" *ngIf="!loading">
-            <div
-              *ngFor="let stage of funnelStages; let i = index; let last = last"
-              class="funnel-stage-card"
-            >
-              <div class="stage-step-indicator">
-                <span class="step-num">0{{ i + 1 }}</span>
-                <span class="stage-badge">{{ stage.badge }}</span>
-              </div>
-
-              <div class="stage-icon-wrap" [style.background]="stage.color">
-                <span class="material-symbols-outlined">{{ stage.icon }}</span>
-              </div>
-
-              <div class="stage-details">
-                <span class="stage-label">{{ stage.label }}</span>
-                <h3 class="stage-count">{{ stage.count | number }}</h3>
-                <span class="stage-name">{{ stage.stageName }}</span>
-              </div>
-
-              <!-- Funnel bar representation -->
-              <div class="stage-progress-bar">
-                <div
-                  class="progress-fill"
-                  [style.width.%]="stage.percentage"
-                  [style.background]="stage.color"
-                ></div>
-              </div>
-              <span class="stage-pct-text">{{ stage.percentage }}% of campaign total</span>
-
-              <!-- Funnel connector arrow -->
-              <div class="funnel-arrow hide-mobile" *ngIf="!last">
-                <span class="material-symbols-outlined">arrow_forward</span>
-              </div>
-            </div>
+        <!-- Daily refresh schedule info below Active Leads (Right side) -->
+        <div class="kpi-refresh-footer">
+          <div class="refresh-schedule-tag">
+            <span class="material-symbols-outlined refresh-tag-icon">schedule</span>
+            <span class="refresh-tag-text">Dashboard data is refreshed daily at 6:00 PM</span>
           </div>
         </div>
       </section>
 
-      <!-- TREND & DISTRIBUTION GRAPHS (2x2 Grid) -->
-      <section class="charts-grid-section">
-        <!-- 1. REGISTRATION TREND GRAPH -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <div>
-              <h3>Registration Trend</h3>
-              <p class="chart-subtitle">Confirmed runner signups across selected timeframe</p>
-            </div>
-            <div class="granularity-toggles">
-              <button
-                type="button"
-                [class.active]="regTrendGranularity === 'daily'"
-                (click)="changeRegTrendGranularity('daily')"
-              >
-                Daily
-              </button>
-              <button
-                type="button"
-                [class.active]="regTrendGranularity === 'weekly'"
-                (click)="changeRegTrendGranularity('weekly')"
-              >
-                Weekly
-              </button>
-              <button
-                type="button"
-                [class.active]="regTrendGranularity === 'monthly'"
-                (click)="changeRegTrendGranularity('monthly')"
-              >
-                Monthly
-              </button>
-            </div>
-          </div>
-
-          <div class="chart-body">
-            <canvas #regTrendCanvas></canvas>
-          </div>
-        </div>
-
-        <!-- 2. LEAD TREND GRAPH -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <div>
-              <h3>Lead Trend</h3>
-              <p class="chart-subtitle">Lead volume & awareness campaign inquiries over time</p>
-            </div>
-            <div class="granularity-toggles">
-              <button
-                type="button"
-                [class.active]="leadTrendGranularity === 'daily'"
-                (click)="changeLeadTrendGranularity('daily')"
-              >
-                Daily
-              </button>
-              <button
-                type="button"
-                [class.active]="leadTrendGranularity === 'weekly'"
-                (click)="changeLeadTrendGranularity('weekly')"
-              >
-                Weekly
-              </button>
-              <button
-                type="button"
-                [class.active]="leadTrendGranularity === 'monthly'"
-                (click)="changeLeadTrendGranularity('monthly')"
-              >
-                Monthly
-              </button>
-            </div>
-          </div>
-
-          <div class="chart-body">
-            <canvas #leadTrendCanvas></canvas>
-          </div>
-        </div>
-
-        <!-- 3. LEAD SOURCE GRAPH (Full Width) -->
+      <!-- LEAD ACQUISITION SOURCE GRAPH (Full Width) -->
+      <section class="charts-grid-section single-chart">
         <div class="chart-card source-chart-card">
           <div class="chart-header">
-            <div>
-              <h3>Lead Acquisition Source</h3>
+            <div class="chart-title-wrap">
+              <div class="title-with-icon">
+                <span class="material-symbols-outlined source-hdr-icon">hub</span>
+                <h3>Lead Acquisition Source</h3>
+              </div>
               <p class="chart-subtitle">Leads and registrations generated per channel (Meta Ads, Website, Referrals)</p>
             </div>
           </div>

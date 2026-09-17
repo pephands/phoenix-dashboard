@@ -39,6 +39,9 @@ export class LeadsComponent implements OnInit, OnDestroy {
   totalPages = 1;
   totalCount = 0;
   canManageLeadCounts = false;
+  lastUpdatedDisplay = 'Sep 17, 2026, 6:00 PM';
+  userName = 'Marathon Admin';
+  userRole = 'Telecaller';
 
   constructor(
     private marathonService: MarathonService,
@@ -47,6 +50,8 @@ export class LeadsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.userName = this.authService.getUserName();
+    this.userRole = this.authService.getUserRole();
     this.canManageLeadCounts = this.authService.canManageLeadCounts();
     this.searchSub = this.searchSubject.pipe(
       debounceTime(300),
@@ -77,6 +82,7 @@ export class LeadsComponent implements OnInit, OnDestroy {
         this.leads = res.results || [];
         this.extractUniqueFilters();
         this.applyClientFilters();
+        this.lastUpdatedDisplay = this.marathonService.getLastUpdatedDisplay(this.leads);
         this.loading = false;
       },
       error: (err) => {

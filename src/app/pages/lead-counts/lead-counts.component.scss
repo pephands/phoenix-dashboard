@@ -9,12 +9,12 @@
 
 /* Sidebar Navigation */
 .counts-sidebar {
-  width: 260px;
+  width: 270px;
   background: #ffffff;
   border-right: 1px solid #f1f5f9;
   display: flex;
   flex-direction: column;
-  padding: 24px 20px;
+  padding: 24px 16px;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -48,18 +48,29 @@
         gap: 6px;
         background: #fff1f2;
         border: 1px solid #fecdd3;
-        padding: 2px 8px;
+        padding: 4px 10px;
         border-radius: 9999px;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 700;
         color: #e11d48;
+        letter-spacing: 0.1px;
+        white-space: nowrap;
         width: fit-content;
+        max-width: 100%;
+        box-sizing: border-box;
 
         .pink-dot {
           width: 6px;
           height: 6px;
           background: #e11d48;
           border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        span:not(.pink-dot) {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
       }
     }

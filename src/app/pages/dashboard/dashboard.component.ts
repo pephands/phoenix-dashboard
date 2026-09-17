@@ -31,14 +31,13 @@ Chart.register(...registerables);
 })
 export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   // Chart canvas refs
-  @ViewChild('regTrendCanvas') regTrendCanvas!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('leadTrendCanvas') leadTrendCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('sourceCanvas') sourceCanvas!: ElementRef<HTMLCanvasElement>;
 
   // Charts
-  private regTrendChart: Chart | null = null;
-  private leadTrendChart: Chart | null = null;
   private sourceChart: Chart | null = null;
+
+  // Sync / Schedule display
+  lastUpdatedDisplay = 'Sep 17, 2026, 6:00 PM';
 
   // State
   loading = true;
@@ -82,6 +81,8 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   // Navigation / UI
   mobileNavOpen = false;
   canManageLeadCounts = false;
+  userName = 'Marathon Admin';
+  userRole = 'Telecaller';
   private filterSub!: Subscription;
 
   constructor(
@@ -92,6 +93,8 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.userName = this.authService.getUserName();
+    this.userRole = this.authService.getUserRole();
     this.canManageLeadCounts = this.authService.canManageLeadCounts();
     this.filterSub = this.marathonService.filters$.subscribe(filters => {
       this.currentPreset = filters.preset;
@@ -113,8 +116,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private destroyCharts(): void {
-    if (this.regTrendChart) { this.regTrendChart.destroy(); this.regTrendChart = null; }
-    if (this.leadTrendChart) { this.leadTrendChart.destroy(); this.leadTrendChart = null; }
     if (this.sourceChart) { this.sourceChart.destroy(); this.sourceChart = null; }
   }
 
@@ -140,6 +141,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.funnelStages = this.marathonService.computeFunnelStages(this.metrics);
         this.sourceBreakdown = this.marathonService.computeSourceBreakdown(stats);
         this.recentActivities = this.marathonService.computeRecentActivity(this.allLeads);
+        this.lastUpdatedDisplay = this.marathonService.getLastUpdatedDisplay(this.allLeads);
 
         if ((stats as any)?.meta_campaign) {
           this.metaCampaign = (stats as any).meta_campaign;
@@ -190,16 +192,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  changeRegTrendGranularity(g: 'daily' | 'weekly' | 'monthly'): void {
-    this.regTrendGranularity = g;
-    this.renderRegistrationTrendChart();
-  }
-
-  changeLeadTrendGranularity(g: 'daily' | 'weekly' | 'monthly'): void {
-    this.leadTrendGranularity = g;
-    this.renderLeadTrendChart();
-  }
-
   toggleMobileNav(): void {
     this.mobileNavOpen = !this.mobileNavOpen;
   }
@@ -208,172 +200,11 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.authService.logout();
   }
 
-  autoCountEnabled: boolean = true;
-
-  toggleAutoCount(): void {
-    this.autoCountEnabled = !this.autoCountEnabled;
-    const msg = this.autoCountEnabled
-      ? `Total Registrations auto-count is ON (Live: ${this.metrics.totalRegistrations} verified database runners).`
-      : `Manual registrations view selected.`;
-    this.notificationService.info(msg, 'Auto-Count Option');
-    this.renderRegistrationTrendChart();
-  }
-
   // ============================================
   // Charts Implementation (Chart.js)
   // ============================================
   renderAllCharts(): void {
-    this.renderRegistrationTrendChart();
-    this.renderLeadTrendChart();
     this.renderSourceChart();
-  }
-
-  private renderRegistrationTrendChart(): void {
-    if (!this.regTrendCanvas?.nativeElement) return;
-    if (this.regTrendChart) {
-      this.regTrendChart.destroy();
-    }
-
-    const rawTrends = (this.statsRaw as any)?.trends;
-    const trends = this.marathonService.computeTrends(this.allLeads, this.regTrendGranularity, rawTrends, this.metaCampaign);
-    const labels = trends.length > 0 ? trends.map(t => t.label) : ['Sep 5', 'Sep 11', 'Sep 12', 'Sep 15'];
-    const data = trends.length > 0 ? trends.map(t => t.registrations) : [5, 3, 7, 2];
-
-    const ctx = this.regTrendCanvas.nativeElement.getContext('2d');
-    if (!ctx) return;
-
-    const gradient = ctx.createLinearGradient(0, 0, 0, 260);
-    gradient.addColorStop(0, 'rgba(225, 29, 72, 0.35)');
-    gradient.addColorStop(1, 'rgba(225, 29, 72, 0.00)');
-
-    this.regTrendChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [
-          {
-            label: `Confirmed Registrations (Auto-Count: ${this.metrics.totalRegistrations})`,
-            data,
-            borderColor: '#e11d48',
-            borderWidth: 3,
-            pointBackgroundColor: '#be123c',
-            pointBorderColor: '#ffffff',
-            pointBorderWidth: 2,
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            fill: true,
-            backgroundColor: gradient,
-            tension: 0.35
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-            titleFont: { size: 13, weight: 'bold' },
-            bodyFont: { size: 12 },
-            padding: 10,
-            cornerRadius: 8,
-            callbacks: {
-              label: (item) => `Registrations (Auto-Count): ${item.formattedValue}`
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { font: { size: 11 }, color: '#64748b' }
-          },
-          y: {
-            beginAtZero: true,
-            grid: { color: 'rgba(244, 114, 182, 0.12)' },
-            ticks: {
-              font: { size: 11 },
-              color: '#64748b',
-              precision: 0
-            }
-          }
-        }
-      }
-    });
-  }
-
-  private renderLeadTrendChart(): void {
-    if (!this.leadTrendCanvas?.nativeElement) return;
-    if (this.leadTrendChart) {
-      this.leadTrendChart.destroy();
-    }
-
-    const rawTrends = (this.statsRaw as any)?.trends;
-    const trends = this.marathonService.computeTrends(this.allLeads, this.leadTrendGranularity, rawTrends, this.metaCampaign);
-    const labels = trends.length > 0 ? trends.map(t => t.label) : ['Sep 5', 'Sep 11', 'Sep 12', 'Sep 15'];
-    const data = trends.length > 0 ? trends.map(t => t.leads) : [24, 32, 48, 23];
-
-    const ctx = this.leadTrendCanvas.nativeElement.getContext('2d');
-    if (!ctx) return;
-
-    const gradient = ctx.createLinearGradient(0, 0, 0, 260);
-    gradient.addColorStop(0, 'rgba(217, 70, 239, 0.35)');
-    gradient.addColorStop(1, 'rgba(217, 70, 239, 0.00)');
-
-    this.leadTrendChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [
-          {
-            label: `Meta Campaign Leads (${this.metaCampaign.meta_leads || 127} Total)`,
-            data,
-            borderColor: '#c026d3',
-            borderWidth: 3,
-            pointBackgroundColor: '#a21caf',
-            pointBorderColor: '#ffffff',
-            pointBorderWidth: 2,
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            fill: true,
-            backgroundColor: gradient,
-            tension: 0.35
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-            titleFont: { size: 13, weight: 'bold' },
-            bodyFont: { size: 12 },
-            padding: 10,
-            cornerRadius: 8,
-            callbacks: {
-              label: (item) => `Meta Campaign Leads: ${item.formattedValue}`
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { font: { size: 11 }, color: '#64748b' }
-          },
-          y: {
-            beginAtZero: true,
-            grid: { color: 'rgba(244, 114, 182, 0.12)' },
-            ticks: {
-              font: { size: 11 },
-              color: '#64748b',
-              precision: 0
-            }
-          }
-        }
-      }
-    });
   }
 
   private renderSourceChart(): void {

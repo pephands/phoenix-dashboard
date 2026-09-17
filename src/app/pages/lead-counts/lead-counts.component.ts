@@ -18,8 +18,8 @@ export class LeadCountsComponent implements OnInit {
   lastSavedAt: Date | null = null;
 
   // Role details
-  userName = 'Marathon Admin';
-  userRole = 'Campaign Administrator';
+  userName = 'Tamizhselvan';
+  userRole = 'Telecaller';
   canManage = true;
 
   // Form Fields
@@ -47,7 +47,7 @@ export class LeadCountsComponent implements OnInit {
     this.canManage = this.authService.canManageLeadCounts();
 
     if (!this.canManage) {
-      this.notificationService.warning('Access restricted: Only authorized coordinators can update lead counts.', 'Unauthorized');
+      this.notificationService.warning('Access restricted: Only users with the Telecaller role can update lead counts.', 'Unauthorized');
       this.router.navigate(['/dashboard']);
       return;
     }

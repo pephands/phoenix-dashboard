@@ -6,7 +6,7 @@
         <img src="assets/images/online_ventures_logo.png" alt="Online Ventures Private Limited" class="sidebar-ov-logo" />
         <div class="brand-sub-badge">
           <span class="pink-ribbon-dot"></span>
-          <span>Pink Marathon 2026</span>
+          <span>Breast Cancer Awareness Marathon</span>
         </div>
       </div>
       <button type="button" class="mobile-close-btn" (click)="toggleMobileNav()">
@@ -27,7 +27,7 @@
       <a *ngIf="canManageLeadCounts" routerLink="/lead-counts" routerLinkActive="active" class="nav-link" (click)="mobileNavOpen = false">
         <span class="material-symbols-outlined">edit_note</span>
         <span>Update Lead Counts</span>
-        <span class="nav-role-badge">Admin</span>
+        <span class="nav-role-badge">Telecaller</span>
       </a>
     </nav>
 
@@ -37,8 +37,8 @@
           <span class="material-symbols-outlined">person</span>
         </div>
         <div class="user-details">
-          <span class="user-name">Marathon Admin</span>
-          <span class="user-status">Awareness Coordinator</span>
+          <span class="user-name">{{ userName }}</span>
+          <span class="user-status">{{ userRole }}</span>
         </div>
       </div>
       <button type="button" class="btn-logout" (click)="logout()" title="Logout">
@@ -60,10 +60,16 @@
       </div>
 
       <div class="right-nav">
-        <button type="button" class="btn-refresh" (click)="loadLeads()">
-          <span class="material-symbols-outlined">refresh</span>
-          <span>Refresh Leads</span>
-        </button>
+        <div class="sync-status-badge">
+          <div class="sync-status-indicator">
+            <span class="pulse-live-dot"></span>
+            <span class="sync-title">Last updated: <strong class="sync-date-value">{{ lastUpdatedDisplay }}</strong></span>
+          </div>
+          <div class="sync-schedule-note">
+            <span class="material-symbols-outlined sync-clock-icon">schedule</span>
+            <span>Every day evening 6:00 PM updated</span>
+          </div>
+        </div>
       </div>
     </header>
 

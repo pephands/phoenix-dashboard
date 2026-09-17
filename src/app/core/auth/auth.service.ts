@@ -99,31 +99,41 @@ export class AuthService {
   canManageLeadCounts(): boolean {
     const user = this.currentUserSubject.value || this.getStoredUser();
     if (!user) {
-      // Check if auth token exists - default authenticated campaign admin
-      return this.hasToken();
+      return false;
     }
-    if (user.is_superuser || user.is_staff) return true;
-    if (user.role && ['admin', 'manager', 'coordinator', 'lead_manager'].includes(user.role.toLowerCase())) return true;
-    if (user.roles && user.roles.some(r => ['admin', 'manager', 'coordinator', 'lead_manager'].includes(r.toLowerCase()))) return true;
-    if (user.username) {
-      const u = user.username.toLowerCase();
-      if (['admin', 'tamizh', 'coordinator', 'manager'].includes(u) || u.includes('admin')) return true;
+    // Only users with the Telecaller role can access and manage lead counts
+    if (user.roles && Array.isArray(user.roles)) {
+      if (user.roles.some(r => typeof r === 'string' && r.trim().toLowerCase() === 'telecaller')) {
+        return true;
+      }
     }
-    return true;
+    if (user.role && user.role.trim().toLowerCase() === 'telecaller') {
+      return true;
+    }
+    return false;
   }
 
   getUserRole(): string {
     const user = this.currentUserSubject.value || this.getStoredUser();
-    if (!user) return 'Awareness Coordinator';
+    if (!user) return 'Telecaller';
+    if (user.roles && Array.isArray(user.roles)) {
+      if (user.roles.some(r => typeof r === 'string' && r.trim().toLowerCase() === 'telecaller')) {
+        return 'Telecaller';
+      }
+    }
+    if (user.role && user.role.trim().toLowerCase() === 'telecaller') {
+      return 'Telecaller';
+    }
     if (user.is_superuser) return 'Campaign Superadmin';
     if (user.role) return user.role;
+    if (user.roles && user.roles.length > 0) return user.roles[0];
     if (user.username && user.username.toLowerCase().includes('admin')) return 'Campaign Administrator';
     return 'Marathon Coordinator';
   }
 
   getUserName(): string {
     const user = this.currentUserSubject.value || this.getStoredUser();
-    return user?.username || 'Marathon Admin';
+    return user?.username || (user as any)?.name || 'Tamizhselvan';
   }
 
   private hasToken(): boolean {
